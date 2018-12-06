@@ -30,3 +30,32 @@
 *.exe
 *.out
 *.app
+
+# Backup files
+*.bak
+
+# Output directories
+Debug
+Release
+x64
+
+# Doxygen files
+html
+
+# vs other files
+.vs
+*.exp
+*.sdf
+*.dsp
+*.dsp~
+*.dsw
+*.htm
+*.bsc
+*.ipch
+*.opendb
+*.exp
+*.bkup
+*.ilk
+*.pdb
+*.suo
+
