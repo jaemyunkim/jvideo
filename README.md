@@ -1,7 +1,8 @@
 # jVideo
 This project contains C++ classes that allow the grab frames from a source device using OpenCV in Windows, macOS, Linux, etc., in order to process or record the video into a video file.
 
-This project uses CMake to be free from the dependency from operating systems, and this requests OpenCV, Boost, and QT5, and don't include those libraries or frameworks in this project. Therefore, before trying this project, you need to prepare those libraries or frameworks in your system. Those are tested in following environments:
+This project uses CMake to be free from the dependency from operating systems and requests OpenCV, Boost, and QT5 (this doesn't include those libraries or frameworks in this project). Therefore, before trying this project, you need to prepare those libraries or frameworks in your system. 
+Those have been tested in the following environments:
 - OpenCV 3.4.3
 - Boost 1.66.0
 - QT 5.11
