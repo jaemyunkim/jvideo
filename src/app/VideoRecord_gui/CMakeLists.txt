@@ -10,6 +10,33 @@ file(GLOB ${PARENT_PROJ_NAME}_HDR "../${PARENT_PROJ_NAME}/*.h*")
 file(GLOB ${PARENT_PROJ_NAME}_SRC "../${PARENT_PROJ_NAME}/*.c*")
 list(REMOVE_ITEM ${PARENT_PROJ_NAME}_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../${PARENT_PROJ_NAME}/main.cpp")
 
+
+# Detect QT ##################################################
+FIND_PACKAGE(Qt5Widgets CONFIG REQUIRED Concurrent)
+
+IF(Qt5Widgets_FOUND)
+	MESSAGE(STATUS "Qt5Widgets version: " ${Qt5Widgets_VERSION})
+	INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
+	# MESSAGE(STATUS "  *1*CMAKE_CURRENT_LIST_DIR : " ${imported_implib})
+	# MESSAGE(STATUS "  *2*CMAKE_CURRENT_LIST_DIR : " ${Qt5Widgets_LIBRARIES})
+
+	# # Find includes in corresponding build directories
+	# set(CMAKE_INCLUDE_CURRENT_DIR ON)
+	# # Instruct CMake to run moc automatically when needed
+	# set(CMAKE_AUTOMOC ON)
+	# # Create code from a list of Qt designer ui files
+	# set(CMAKE_AUTOUIC ON)
+ENDIF(Qt5Widgets_FOUND)
+
+#find_package(Qt5Concurrent 5.0.0 REQUIRED)
+FIND_PACKAGE(Qt5Concurrent REQUIRED PATHS ${Qt5Widgets_DIR}/../Qt5Concurrent)
+IF(Qt5Concurrent_FOUND)
+	MESSAGE(STATUS "Qt5Concurrent version: " ${Qt5Concurrent_VERSION})
+ENDIF(Qt5Concurrent_FOUND)
+
+# Detect QT ##################################################
+
+
 SET(PROJ_FILES ${${PROJ_NAME}_HDR} ${${PROJ_NAME}_SRC} ${${PROJ_NAME}_QT_UI}
 	${${PARENT_PROJ_NAME}_HDR} ${${PARENT_PROJ_NAME}_SRC})
 SET(PROJ_LIBS ${Boost_LIBRARIES} ${OpenCV_LIBS} ${Qt5Widgets_LIBRARIES} getopt)

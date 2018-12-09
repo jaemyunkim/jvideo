@@ -35,6 +35,7 @@
 *.bak
 
 # Output directories
+build
 Debug
 Release
 x64
@@ -59,3 +60,5 @@ html
 *.pdb
 *.suo
 
+# vs code files
+.vscode

@@ -4,7 +4,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 3.1.0)
 
-PROJECT (jVideo)
+PROJECT (jVideo VERSION 0.0.1)
 
 # set output path both execution and library files.
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -63,30 +63,6 @@ IF(OpenCV_FOUND)
 	ENDIF(WIN32)
 
 ENDIF(OpenCV_FOUND)
-
-
-# Detect QT ##################################################
-FIND_PACKAGE(Qt5Widgets CONFIG REQUIRED Concurrent)
-
-IF(Qt5Widgets_FOUND)
-	MESSAGE(STATUS "Qt5Widgets version: " ${Qt5Widgets_VERSION})
-	INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
-	# MESSAGE(STATUS "  *1*CMAKE_CURRENT_LIST_DIR : " ${imported_implib})
-	# MESSAGE(STATUS "  *2*CMAKE_CURRENT_LIST_DIR : " ${Qt5Widgets_LIBRARIES})
-
-	# # Find includes in corresponding build directories
-	# set(CMAKE_INCLUDE_CURRENT_DIR ON)
-	# # Instruct CMake to run moc automatically when needed
-	# set(CMAKE_AUTOMOC ON)
-	# # Create code from a list of Qt designer ui files
-	# set(CMAKE_AUTOUIC ON)
-ENDIF(Qt5Widgets_FOUND)
-
-#find_package(Qt5Concurrent 5.0.0 REQUIRED)
-FIND_PACKAGE(Qt5Concurrent REQUIRED PATHS ${Qt5Widgets_DIR}/../Qt5Concurrent)
-IF(Qt5Concurrent_FOUND)
-	MESSAGE(STATUS "Qt5Concurrent version: " ${Qt5Concurrent_VERSION})
-ENDIF(Qt5Concurrent_FOUND)
 
 # Detect OpenMP ##################################################
 #OPTION (USE_OpenMP "Use OpenMP" ON)
