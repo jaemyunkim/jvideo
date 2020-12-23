@@ -1,4 +1,4 @@
-﻿#include "FrameGrab.h"
+#include "FrameGrab.h"
 
 
 // Default constructor.
@@ -35,7 +35,7 @@ void FrameGrab::openSource()
 		{
 #ifdef WIN32 && (CV_VERSION_MAJOR >= 3)
 			mInputCap.open(mDevId, cv::CAP_DSHOW);	// FFMPEG(1000); MSMF(990); DSHOW(980); CV_IMAGES(970); CV_MJPEG(960)
-#elif // !WIN32 && (CV_VERSION_MAJOR >= 3)
+#else // !WIN32 && (CV_VERSION_MAJOR >= 3)
 			mInputCap.open(mDevId);
 #endif // !WIN32 && (CV_VERSION_MAJOR >= 3)
 		}
@@ -70,8 +70,8 @@ void FrameGrab::readFrame()
 		mFrameMutex.unlock();
 
 		// get meta-information.
-		mFps = mInputCap.get(CV_CAP_PROP_FPS);
-		mResolution = cv::Size((int)mInputCap.get(CV_CAP_PROP_FRAME_WIDTH), (int)mInputCap.get(CV_CAP_PROP_FRAME_HEIGHT));
+		mFps = mInputCap.get(cv::CAP_PROP_FPS);
+		mResolution = cv::Size((int)mInputCap.get(cv::CAP_PROP_FRAME_WIDTH), (int)mInputCap.get(cv::CAP_PROP_FRAME_HEIGHT));
 	}
 	catch(std::exception &e)
 	{
