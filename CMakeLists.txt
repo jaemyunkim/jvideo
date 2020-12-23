@@ -20,6 +20,7 @@ IF(WIN32 OR MINGW)
 		MESSAGE(FATAL_ERROR "Please set Boost_INCLUDE_DIR in Advanced.")
 	ELSE(NOT Boost_INCLUDE_DIR)
 		set(CMAKE_INCLUDE_CURRENT_DIR ON)
+		set(Boost_DIR ${Boost_INCLUDE_DIR})
 	ENDIF(NOT Boost_INCLUDE_DIR)
 	
 	#set(Boost_INCLUDE_DIR ${Boost_DIR})
