@@ -1,4 +1,4 @@
-﻿#include "FrameRecord.h"
+#include "FrameRecord.h"
 
 
 // Default constructor.
@@ -36,7 +36,7 @@ void FrameRecord::openFile()
 		fs::create_directories(mFName.parent_path());
 
 		// Set Encoding fourcc, fps, resoltuion.
-		int fourcc = CV_FOURCC('X', 'V', 'I', 'D');
+		int fourcc = cv::VideoWriter::fourcc('X', 'V', 'I', 'D');
 
 		// Setup output video
 		mOutputCap.open(mFName.string(),// argv[2],

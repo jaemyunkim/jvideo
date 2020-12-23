@@ -1,4 +1,4 @@
-﻿#ifdef _MSC_VER
+#ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -6,7 +6,7 @@
 
 
 // use opencv
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 #include "VideoRecord.h"
 #include "FrameGrab.h"
