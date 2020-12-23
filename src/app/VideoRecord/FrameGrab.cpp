@@ -33,7 +33,11 @@ void FrameGrab::openSource()
 		}
 		else
 		{
+#ifdef WIN32 && (CV_VERSION_MAJOR >= 3)
+			mInputCap.open(mDevId, cv::CAP_DSHOW);	// FFMPEG(1000); MSMF(990); DSHOW(980); CV_IMAGES(970); CV_MJPEG(960)
+#elif // !WIN32 && (CV_VERSION_MAJOR >= 3)
 			mInputCap.open(mDevId);
+#endif // !WIN32 && (CV_VERSION_MAJOR >= 3)
 		}
 
 		if (!mInputCap.isOpened())
@@ -160,6 +164,7 @@ void FrameGrab::run(cv::Mat &frame)
 			// copy the frame to shared frame buffer.
 			mFrameMutex.lock();
 			mFrame.copyTo(frame);
+			cv::flip(frame, frame, 1);	// horizontal flipping for mirror effect
 			mFrameMutex.unlock();
 
 			// set the working status.
