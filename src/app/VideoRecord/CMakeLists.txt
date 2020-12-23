@@ -69,7 +69,7 @@ if(WIN32)
 
 		foreach(f ${CMAKE_CONFIGURATION_TYPES})
 			file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}.vcxproj.user "<PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='${f}|${USER_PLATFORM}'\">\n")
-			file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}.vcxproj.user "<LocalDebuggerEnvironment>PATH=${_OpenCV_LIB_PATH};${_OpenCV_LIB_PATH}${OpenCV_LIB_DIR_DBG};${_OpenCV_LIB_PATH}${OpenCV_LIB_DIR_OPT};%PATH%</LocalDebuggerEnvironment>\n")
+			file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}.vcxproj.user "<LocalDebuggerEnvironment>PATH=${OpenCV_CONFIG_PATH}/../bin;${_qt5Widgets_install_prefix}/bin;%PATH%</LocalDebuggerEnvironment>\n")
 			file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}.vcxproj.user "<DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>\n")
 			file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}.vcxproj.user "<LocalDebuggerWorkingDirectory>${CMAKE_BINARY_DIR}/bin</LocalDebuggerWorkingDirectory>\n")
 			file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PROJ_NAME}.vcxproj.user "</PropertyGroup>\n")
