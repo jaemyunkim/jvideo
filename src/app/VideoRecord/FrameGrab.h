@@ -15,11 +15,11 @@
 namespace fs = boost::filesystem;
 
 
-/*
-*	@class	FrameGrab
-*	@brief	Frame grab class.
-*	@authro	Jaemyun Kim.
-*	@date	05 Nov. 2018
+/**
+* @class	FrameGrab
+* @brief	Frame grab class.
+* @author	Jaemyun Kim.
+* @date		05 Nov. 2018
 */
 class FrameGrab
 {
@@ -70,7 +70,7 @@ public:
 	*/
 	const cv::Mat getFrame()
 	{
-		return mFrame;
+		return mFrames;
 	}
 
 	/**
@@ -142,7 +142,7 @@ protected:
 
 	bool mIsGrab;	///< Status of repeat that frame grab from the source.
 	bool mIsReady;	///< Status of frame grabbing.
-	cv::Mat mFrame;	///< Image buffer having frame from the source.
+	std::list<cv::Mat> mFrames;	///< Image buffer having frame from the source.
 	cv::VideoCapture mInputCap;	///< Video frame grabber.
 	long mFrameCount;	///< frame counter that counts a number of frames.
 

@@ -17,11 +17,11 @@
 namespace fs = boost::filesystem;
 
 
-/*
-*	@class	VideoRecord
-*	@brief	Video recorder class.
-*	@authro	Jaemyun Kim.
-*	@date	31 Oct. 2018
+/**
+* @class	VideoRecord
+* @brief	Video recorder class.
+* @author	Jaemyun Kim.
+* @date		31 Oct. 2018
 */
 class VideoRecord
 {
@@ -85,7 +85,7 @@ public:
 	virtual void run();// override;
 
 protected:
-	FrameGrab mFg;	///< Frame brabber.
+	FrameGrab mFg;	///< Frame grabber.
 	FrameRecord mFr;	///< Frame recorder.
 
 	int mFrameCount;	///< frame counter that counts a number of frames.

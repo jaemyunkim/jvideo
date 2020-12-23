@@ -16,11 +16,11 @@
 namespace fs = boost::filesystem;
 
 
-/*
-*	@class	FrameRecord
-*	@brief	Frame record class.
-*	@authro	Jaemyun Kim.
-*	@date	17 Nov. 2018
+/**
+* @class	FrameRecord
+* @brief	Frame record class.
+* @author	Jaemyun Kim.
+* @date		17 Nov. 2018
 */
 class FrameRecord
 {

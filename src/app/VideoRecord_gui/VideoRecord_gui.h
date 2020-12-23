@@ -24,11 +24,11 @@ namespace fs = boost::filesystem;
 #include "FrameRecord.h"
 
 
-/*
-*	@class	VideoRecord_gui
-*	@brief	Video recorder class.
-*	@authro	Jaemyun Kim.
-*	@date	31 Oct. 2018
+/**
+* @class	VideoRecord_gui
+* @brief	Video recorder class.
+* @author	Jaemyun Kim.
+* @date		31 Oct. 2018
 */
 class VideoRecord_gui : public QWidget, private Ui::jVdRec
 {
