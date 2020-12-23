@@ -127,6 +127,9 @@ if(WIN32)
 
 		# We need add -DQT_WIDGETS_LIB when using QtWidgets in Qt 5.
 		add_definitions(${Qt5Widgets_DEFINITIONS})
+
+		# enable multi-processor compilation
+		add_definitions(/MP)
 	endif(MSVC)
 endif(WIN32)
 
