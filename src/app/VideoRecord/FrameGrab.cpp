@@ -153,6 +153,8 @@ void FrameGrab::run(cv::Mat &frame)
 		// Loop to read from input.
 		while (mIsGrab == true)
 		{
+			std::chrono::milliseconds duration(long(1000.f / mFps));
+
 			// determine time at start.
 			startTimestamp = std::chrono::system_clock::now();
 
@@ -181,7 +183,8 @@ void FrameGrab::run(cv::Mat &frame)
 			std::cout << "  ** FrameGrab:\tframe: " << mFrameCount << "\tprocessing time: " << procTime.count() << " sec" << std::endl;
 
 			// wait a milli seconds to reduce cpu usage.
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			std::this_thread::sleep_until(startTimestamp + duration);
 
 			// calculate total processing time.
 			totalProcTime += procTime;

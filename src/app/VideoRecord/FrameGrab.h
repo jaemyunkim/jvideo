@@ -70,7 +70,7 @@ public:
 	*/
 	const cv::Mat getFrame()
 	{
-		return mFrames;
+		return mFrame;
 	}
 
 	/**
@@ -142,6 +142,7 @@ protected:
 
 	bool mIsGrab;	///< Status of repeat that frame grab from the source.
 	bool mIsReady;	///< Status of frame grabbing.
+	cv::Mat mFrame;	///< Image buffer having frame from the source.
 	std::list<cv::Mat> mFrames;	///< Image buffer having frame from the source.
 	cv::VideoCapture mInputCap;	///< Video frame grabber.
 	long mFrameCount;	///< frame counter that counts a number of frames.
