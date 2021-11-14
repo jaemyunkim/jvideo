@@ -32,10 +32,10 @@ void openCameras(std::atomic_bool& condition, std::vector<VideoCaptureType>& vid
 		// wait until the previous jobs are done.
 		for (int i = 0; i < futures.size(); i++)
 			futures[i].wait();
-	}
 
-	// keep trying to open each camera in every [waitFor] sec.
-	std::this_thread::sleep_for(std::chrono::milliseconds(waitFor));
+		// keep trying to open each camera in every [waitFor] sec.
+		std::this_thread::sleep_for(std::chrono::milliseconds(waitFor));
+	}
 }
 
 

@@ -33,7 +33,7 @@ public:
 	virtual ~MultiVideoCapture();
 
 	virtual void open(std::vector<int> cameraIds);
-	virtual void open(std::vector<int> cameraIds, int apiPerference);
+	virtual void open(std::vector<int> cameraIds, int apiPreference);
 	virtual void release();
     
 	virtual bool isOpened(int cameraNum) const;
