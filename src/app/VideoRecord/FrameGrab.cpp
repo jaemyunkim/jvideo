@@ -33,7 +33,7 @@ void FrameGrab::openSource()
 		}
 		else
 		{
-#ifdef WIN32 && (CV_VERSION_MAJOR >= 3)
+#if defined(WIN32) && (CV_VERSION_MAJOR >= 3)
 			mInputCap.open(mDevId, cv::CAP_DSHOW);	// FFMPEG(1000); MSMF(990); DSHOW(980); CV_IMAGES(970); CV_MJPEG(960)
 #else // !WIN32 && (CV_VERSION_MAJOR >= 3)
 			mInputCap.open(mDevId);

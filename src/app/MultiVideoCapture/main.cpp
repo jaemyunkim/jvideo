@@ -1,5 +1,6 @@
 #include <iostream>
 #include <thread>
+#include <chrono>
 
 #include "opencv2/opencv.hpp"
 #include "MultiVideoCapture.hpp"
@@ -35,7 +36,8 @@ int main() {
 		}
 
 		std::chrono::duration<double> capture_sec = capture_times[1] - capture_times[0];
-		std::chrono::duration<double> diff_sec = std::chrono::abs(cam_times[0] - cam_times[1]);
+		std::chrono::duration<double> diff_sec = cam_times[0] - cam_times[1];
+		diff_sec = (diff_sec >= diff_sec.zero()) ? diff_sec : -diff_sec;
 		std::cout << "capture time: " << std::setw(10) << std::left << capture_sec.count() << " sec";
 		std::cout << "\ttime difference: " << std::setw(10) << std::left << diff_sec.count() << " sec" << std::endl;
 

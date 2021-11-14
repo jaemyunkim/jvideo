@@ -45,7 +45,7 @@ ENDIF(Boost_FOUND)
 #ELSE(WIN32)
 #	SET(OpenCV_STATIC OFF)
 #ENDIF(WIN32)
-FIND_PACKAGE(OpenCV REQUIRED COMPONENTS core imgproc highgui)
+FIND_PACKAGE(OpenCV REQUIRED COMPONENTS core imgproc highgui videoio)
 IF(OpenCV_FOUND)
 	MESSAGE(STATUS "OpenCV version: " ${OpenCV_VERSION})
 	MESSAGE(STATUS "Found the following OpenCV libraries: \n  core\n  imgproc\n  highgui")
@@ -135,6 +135,8 @@ endif(WIN32)
 
 
 # use c++11 version
+set(CMAKE_CXX_FLAGS "-std=c++11")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 set(CMAKE_CXX_STANDARD 11) # C++11...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11

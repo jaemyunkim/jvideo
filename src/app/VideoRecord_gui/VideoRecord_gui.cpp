@@ -1,7 +1,7 @@
 #include "VideoRecord_gui.h"
 
 #include <chrono>
-#include <qmessagebox>
+#include <QMessageBox>
 #include <QFileDialog>
 
 #include "VideoResolution.h"
@@ -90,7 +90,7 @@ void VideoRecord_gui::displayImage()
 	
 	// convert BGR in opencv to RGB for qt display.
 	cv::Mat img;
-#ifdef CV_VERSION_MAJOR >= 4
+#if CV_VERSION_MAJOR >= 4
 	cv::cvtColor(mFrame, img, cv::COLOR_BGR2RGB);
 #else // !CV_VERSION_MAJOR >= 4
 	cv::cvtColor(mFrame, img, CV_BGR2RGB);

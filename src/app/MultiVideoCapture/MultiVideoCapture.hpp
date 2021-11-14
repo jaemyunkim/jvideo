@@ -10,8 +10,9 @@
 #  ifdef DLL_EXPORTS
 #    if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
 #      define MULTIVIDEOCAPTURE_EXPORTS __declspec(dllexport)
-#    elif defined __GNUC__ && __GNUC__ >= 4 && (defined(CVAPI_EXPORTS) || defined(__APPLE__))
+#    elif defined __GNUC__ && __GNUC__ >= 4 || defined(__APPLE__)
 #      define MULTIVIDEOCAPTURE_EXPORTS __attribute__ ((visibility ("default")))
+#      define FRAMETYPE_TEMPLATE
 #    endif
 #  else
 #    define MULTIVIDEOCAPTURE_EXPORTS __declspec(dllimport)
