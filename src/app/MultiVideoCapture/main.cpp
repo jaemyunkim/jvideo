@@ -18,16 +18,26 @@ int main() {
 
 	std::chrono::system_clock::time_point wait_until;
 	std::chrono::milliseconds duration(long(1000.f / fps));
+	std::chrono::system_clock::time_point capture_times[2];
+	std::chrono::system_clock::time_point cam_times[2];
 	char c = ' ';
 	while (c != 17) {	// 17 == ctrl + q
 		wait_until = std::chrono::system_clock::now() + duration;
 
+		capture_times[0] = std::chrono::system_clock::now();
 		mvc >> images;
+		capture_times[1] = std::chrono::system_clock::now();
 
 		for (int i = 0; i < camIds.size(); i++) {
+			cam_times[i] = images[i].timestamp();
 			if (!images[i].empty())
 				cv::imshow("cam " + std::to_string(i), images[i].mat());
 		}
+
+		std::chrono::duration<double> capture_sec = capture_times[1] - capture_times[0];
+		std::chrono::duration<double> diff_sec = std::chrono::abs(cam_times[0] - cam_times[1]);
+		std::cout << "capture time: " << std::setw(10) << std::left << capture_sec.count() << " sec";
+		std::cout << "\ttime difference: " << std::setw(10) << std::left << diff_sec.count() << " sec" << std::endl;
 
 		c = cv::waitKey(1);
 

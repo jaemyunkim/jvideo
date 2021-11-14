@@ -7,7 +7,6 @@
 
 #include "opencv2/opencv.hpp"
 #include "FrameType.hpp"
-#include "VideoCaptureType.hpp"
 
 
 class MultiVideoCapture {
@@ -32,7 +31,6 @@ protected:
     void resize(size_t size);
 
 protected:
-    std::vector<VideoCaptureType> mVidCaps;
     int mApiPreference;
     cv::Size mResolution;
     float mFps;
