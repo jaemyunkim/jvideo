@@ -7,7 +7,7 @@
 std::mutex gMtxCamRead;
 
 #include "ThreadPool.hpp"
-ThreadPool::ThreadPool thread_pool(8);
+ThreadPool::ThreadPool* pThread_pool = NULL;
 std::atomic_bool camOpenCondition;
 
 
@@ -25,7 +25,7 @@ void openCameras(std::atomic_bool& condition, std::vector<VideoCaptureType>& vid
 		for (int i = 0; i < nbDevs; i++) {
 			if (vidCaps[i].status() != CAM_STATUS_OPENED) {
 				int id = camIds[i];
-				futures.emplace_back(thread_pool.EnqueueJob(openfunc, &vidCaps[i], id, apiPreference));
+				futures.emplace_back(pThread_pool->EnqueueJob(openfunc, &vidCaps[i], id, apiPreference));
 			}
 		}
 
@@ -46,7 +46,6 @@ MultiVideoCapture::MultiVideoCapture() {
 
 MultiVideoCapture::~MultiVideoCapture() {
 	release();
-	thread_pool.~ThreadPool();
 }
 
 
@@ -58,10 +57,12 @@ void MultiVideoCapture::open(std::vector<int> cameraIds) {
 void MultiVideoCapture::open(std::vector<int> cameraIds, int apiPreference) {
 	this->resize(cameraIds.size());
 
+	pThread_pool = new ThreadPool::ThreadPool(gVidCaps.size() * 2 + 2);
+
 	mApiPreference = apiPreference;
 	camOpenCondition.store(true);
 
-	thread_pool.EnqueueJob(openCameras, std::ref(camOpenCondition), std::ref(gVidCaps), cameraIds, mApiPreference);
+	pThread_pool->EnqueueJob(openCameras, std::ref(camOpenCondition), std::ref(gVidCaps), cameraIds, mApiPreference);
 
 	while (!isAnyOpened()) {
 		std::cout << ".";
@@ -82,13 +83,20 @@ void MultiVideoCapture::release() {
 
 	for (int i = 0; i < nbDevs; i++) {
 		if (gVidCaps[i].status() != CAM_STATUS_CLOSED) {
-			futures.emplace_back(thread_pool.EnqueueJob(releasefunc, &gVidCaps[i]));
+			futures.emplace_back(pThread_pool->EnqueueJob(releasefunc, &gVidCaps[i]));
 		}
 	}
 
 	// wait until the previous jobs are done.
 	for (int i = 0; i < futures.size(); i++)
 		futures[i].wait();
+
+	if (pThread_pool) {
+		//pThread_pool->~ThreadPool();
+		//pThread_pool->destroy();
+		delete[] pThread_pool;
+		pThread_pool = NULL;
+	}
 }
 
 
@@ -134,7 +142,7 @@ bool MultiVideoCapture::read(std::vector<FrameType>& images) {
 
 	for (int i = 0; i < nbDevs; i++) {
 		if (gVidCaps[i].status() == CAM_STATUS_OPENED) {
-			futures.emplace_back(thread_pool.EnqueueJob(readfunc, &gVidCaps[i], std::ref(images[i])));
+			futures.emplace_back(pThread_pool->EnqueueJob(readfunc, &gVidCaps[i], std::ref(images[i])));
 		}
 	}
 
