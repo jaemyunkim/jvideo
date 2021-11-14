@@ -2,6 +2,11 @@
 #define VIDEO_CAPTURE_TYPE_H_
 
 
+#ifndef __cplusplus
+#  error MultiVideoCapture.hpp header must be compiled as C++
+#endif
+
+
 #include "opencv2/opencv.hpp"
 #include "FrameType.hpp"
 

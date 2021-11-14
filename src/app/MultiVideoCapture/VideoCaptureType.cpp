@@ -122,10 +122,15 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 	double oldAutofocus = cv::VideoCapture::get(cv::CAP_PROP_AUTOFOCUS);
 
 	// set resolution and fps
-	bool statusSize = false;
-		//cv::VideoCapture::set(cv::CAP_PROP_FRAME_WIDTH, resolution.width) &&
-		//cv::VideoCapture::set(cv::CAP_PROP_FRAME_HEIGHT, resolution.height);
-	bool statusFps = false;// cv::VideoCapture::set(cv::CAP_PROP_FPS, fps);
+	bool statusSize= true, statusFps = true;
+	if (resolution != oldSize) {
+		statusSize = 
+			cv::VideoCapture::set(cv::CAP_PROP_FRAME_WIDTH, resolution.width) &&
+			cv::VideoCapture::set(cv::CAP_PROP_FRAME_HEIGHT, resolution.height);
+	}
+	if (fps != oldFps) {
+		statusFps = cv::VideoCapture::set(cv::CAP_PROP_FPS, fps);
+	}
 
 	if (statusSize && statusFps) {
 		return true;

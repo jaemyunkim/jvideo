@@ -2,6 +2,23 @@
 #define MULTI_VIDEO_CAPTURE_H_
 
 
+#ifndef __cplusplus
+#  error MultiVideoCapture.hpp header must be compiled as C++
+#endif
+
+#ifndef MULTIVIDEOCAPTURE_EXPORTS
+#  ifdef DLL_EXPORTS
+#    if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
+#      define MULTIVIDEOCAPTURE_EXPORTS __declspec(dllexport)
+#    elif defined __GNUC__ && __GNUC__ >= 4 && (defined(CVAPI_EXPORTS) || defined(__APPLE__))
+#      define MULTIVIDEOCAPTURE_EXPORTS __attribute__ ((visibility ("default")))
+#    endif
+#  else
+#    define MULTIVIDEOCAPTURE_EXPORTS __declspec(dllimport)
+#  endif	// !DLL_EXPORTS
+#endif	// !MULTIVIDEOCAPTURE_EXPORTS
+
+
 #include <iostream>
 #include <vector>
 
@@ -9,26 +26,26 @@
 #include "FrameType.hpp"
 
 
-class MultiVideoCapture {
+class MULTIVIDEOCAPTURE_EXPORTS MultiVideoCapture {
 public:
-    MultiVideoCapture();
-    ~MultiVideoCapture();
+	MultiVideoCapture();
+	virtual ~MultiVideoCapture();
 
-    void open(std::vector<int> cameraIds);
-    void open(std::vector<int> cameraIds, int apiPerference);
-    void release();
+	virtual void open(std::vector<int> cameraIds);
+	virtual void open(std::vector<int> cameraIds, int apiPerference);
+	virtual void release();
     
-    bool isOpened(int cameraNum) const;
-    bool isAnyOpened() const;
-    bool isAllOpened() const;
+	virtual bool isOpened(int cameraNum) const;
+	virtual bool isAnyOpened() const;
+	virtual bool isAllOpened() const;
 
-    bool read(std::vector<FrameType>& images);
-    virtual MultiVideoCapture& operator >> (std::vector<FrameType>& images);
+	virtual bool read(std::vector<FrameType>& images);
+	virtual MultiVideoCapture& operator >> (std::vector<FrameType>& images);
 
-    virtual bool set(cv::Size resolution = {640, 480}, float fps = 30.f);
+	virtual bool set(cv::Size resolution = { 640, 480 }, float fps = 30.f);
 
 protected:
-    void resize(size_t size);
+	virtual void resize(size_t size);
 
 protected:
     int mApiPreference;
