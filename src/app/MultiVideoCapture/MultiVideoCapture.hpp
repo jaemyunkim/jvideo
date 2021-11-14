@@ -43,15 +43,18 @@ public:
 	virtual bool read(std::vector<FrameType>& images);
 	virtual MultiVideoCapture& operator >> (std::vector<FrameType>& images);
 
-	virtual bool set(cv::Size resolution = { 640, 480 }, float fps = 30.f);
+	virtual bool set(cv::Size resolution, float fps);
+	virtual bool set(int cameraId, cv::Size resolution, float fps);
 
 protected:
 	virtual void resize(size_t size);
 
 protected:
+	std::vector<int> mCameraIds;
     int mApiPreference;
-    cv::Size mResolution;
-    float mFps;
+
+	std::vector<cv::Size> mResolutions;
+	std::vector<float> mFpses;
 };
 
 

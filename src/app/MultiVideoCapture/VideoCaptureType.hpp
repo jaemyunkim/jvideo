@@ -35,6 +35,7 @@ public:
 	virtual VideoCaptureType& operator >> (FrameType& frame);
 
 	virtual bool set(cv::Size resolution = { 640, 480 }, float fps = 30.f);
+	virtual double get(int propId) const;
 
 protected:
 	int mCamId;

@@ -44,14 +44,8 @@ bool VideoCaptureType::open(int index, int apiPreference) {
 
 	if (cam_status == true && cv::VideoCapture::grab() == true) {
 		mCamId = index;
-
-		// disable autofocus
-		if (cv::VideoCapture::get(cv::CAP_PROP_AUTOFOCUS) != 0) {
-			cv::VideoCapture::set(cv::CAP_PROP_AUTOFOCUS, 0);
-		}
-		set(mResolution, mFps);
-
 		mStatus = CAM_STATUS_OPENED;
+		//set(mResolution, mFps);
 	}
 	else {
 		release();
@@ -121,8 +115,13 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 	double oldFps = cv::VideoCapture::get(cv::CAP_PROP_FPS);
 	double oldAutofocus = cv::VideoCapture::get(cv::CAP_PROP_AUTOFOCUS);
 
+	// disable autofocus
+	if (cv::VideoCapture::get(cv::CAP_PROP_AUTOFOCUS) != 0) {
+		cv::VideoCapture::set(cv::CAP_PROP_AUTOFOCUS, 0);
+	}
+
 	// set resolution and fps
-	bool statusSize= true, statusFps = true;
+	bool statusSize = true, statusFps = true;
 	if (resolution != oldSize) {
 		statusSize = 
 			cv::VideoCapture::set(cv::CAP_PROP_FRAME_WIDTH, resolution.width) &&
@@ -144,5 +143,20 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 		cv::VideoCapture::set(cv::CAP_PROP_FPS, oldFps);
 
 		return false;
+	}
+}
+
+
+double VideoCaptureType::get(int propId) const {
+	switch (propId)
+	{
+	case cv::CAP_PROP_FRAME_WIDTH:
+		return mResolution.width;
+	case cv::CAP_PROP_FRAME_HEIGHT:
+		return mResolution.height;
+	case cv::CAP_PROP_FPS:
+		return mFps;
+	default:
+		return cv::VideoCapture::get(propId);
 	}
 }

@@ -27,6 +27,7 @@ set(PROJ_LIBS_RELEASE ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 
 # set build target ####################################################
+set(CMAKE_DEBUG_POSTFIX d)
 set_source_files_properties(${PROJ_FILES}
     PROPERTIES
     COMPILE_FLAGS "-D__NO_UI__ -D_CRT_SECURE_NO_WARNINGS")
@@ -43,6 +44,7 @@ set_source_files_properties(${PROJ_TESTER_FILES}
     PROPERTIES
     COMPILE_FLAGS "-D__NO_UI__ -D_CRT_SECURE_NO_WARNINGS")
 add_executable(${PROJ_NAME}_test ${PROJ_TESTER_FILES})
+set_target_properties(${PROJ_NAME}_test PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 target_link_libraries(${PROJ_NAME}_test
     debug ${PROJ_LIBS_DEBUG} MultiVideoCapture 
     optimized ${PROJ_LIBS_RELEASE} MultiVideoCapture
@@ -58,10 +60,10 @@ if(WIN32)
         )
 
         # "Enable C++ Exceptions" - "Yes with SEH Exceptions (/EHa)"
-        # set(compile_flags /EHa)
-        # set_target_properties(${PROJ_NAME} 
-        #     PROPERTIES COMPILE_FLAGS ${compile_flags}
-        # )
+        set(compile_flags /EHa)
+        set_target_properties(${PROJ_NAME} 
+            PROPERTIES COMPILE_FLAGS ${compile_flags}
+        )
 
         # OpenCV path config in visual studio user file
         set_target_properties(${PROJ_NAME}
@@ -81,7 +83,7 @@ $<$<CONFIG:Debug>:${_OpenCV_LIB_PATH}${OpenCV_LIB_DIR_DBG};>$<$<NOT:$<CONFIG:Deb
 
         # get opencv dlls
         get_target_property(__opencv_dll_dbg opencv_world IMPORTED_LOCATION_DEBUG)
-        get_target_property(__opencv_dll_release opencv_world IMPORTED__LOCATION_RELEASE)
+        get_target_property(__opencv_dll_release opencv_world IMPORTED_LOCATION_RELEASE)
     endif(MSVC)
 endif(WIN32)
 
@@ -90,14 +92,15 @@ endif(WIN32)
 # set default install prefix
 set(CMAKE_INSTALL_PREFIX "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/install" CACHE PATH "Installation Directory" FORCE)
 
-install(TARGETS     ${PROJ_NAME}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJNAME}/
+install(TARGETS     ${PROJ_NAME} ${PROJ_NAME}_test
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}/
 )
 
 if(WIN32)
     if(MSVC)
         # copy dlls
-        install(FILES       ${__opencv_dll_release} # opencv dlls
+        install(FILES       $<$<CONFIG:Debug>:${__opencv_dll_dbg}>  # opencv dlls
+                            $<$<NOT:$<CONFIG:Debug>>:${__opencv_dll_release}>   # opencv dlls
                 DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}/
         )
     endif(MSVC)

@@ -15,10 +15,10 @@ int main() {
 
 	MultiVideoCapture mvc;
 	mvc.open(camIds, CV_CAP_DSHOW);
-	mvc.set(resolution, fps);
+	mvc.set(1, resolution, fps);
 
-	std::chrono::system_clock::time_point wait_until;
 	std::chrono::milliseconds duration(long(1000.f / fps));
+	std::chrono::system_clock::time_point wait_until;
 	std::chrono::system_clock::time_point capture_times[2];
 	std::chrono::system_clock::time_point cam_times[2];
 	char c = ' ';
