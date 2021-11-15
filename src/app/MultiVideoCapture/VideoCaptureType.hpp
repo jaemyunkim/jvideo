@@ -13,8 +13,9 @@
 
 enum CamStatus {
 	CAM_STATUS_CLOSED,
-	CAM_STATUS_OPENED,
 	CAM_STATUS_OPENING,
+	CAM_STATUS_OPENED,
+	CAM_STATUS_SETTING,
 };
 
 
@@ -34,12 +35,14 @@ public:
 	virtual bool read(FrameType& frame);
 	virtual VideoCaptureType& operator >> (FrameType& frame);
 
-	virtual bool set(cv::Size resolution = { 640, 480 }, float fps = 30.f);
+	virtual bool set(cv::Size resolution = { -1, -1 }, float fps = -1.f);
 	virtual double get(int propId) const;
 
 protected:
 	int mCamId;
 	CamStatus mStatus;
+	int mCloseCount;
+	int mCloseLimit;
 
 	cv::Size mResolution;
 	float mFps;

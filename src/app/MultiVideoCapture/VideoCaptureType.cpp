@@ -1,6 +1,12 @@
 #include "VideoCaptureType.hpp"
 
+#include <condition_variable>
+std::condition_variable gCvCamOpen;
+
+#include <chrono>
+#include <thread>
 #include <mutex>
+std::mutex gMtxStatus;
 std::mutex gMtxPrintMsg;
 
 
@@ -12,6 +18,7 @@ VideoCaptureType::VideoCaptureType() {
 
 
 VideoCaptureType::~VideoCaptureType() {
+	gCvCamOpen.notify_all();
 	this->release();
 }
 
@@ -35,7 +42,9 @@ bool VideoCaptureType::open(int index, int apiPreference) {
 	}
 
 	// try to open the camera
+	release();	// handling the camera disconnected previously
 	mStatus = CAM_STATUS_OPENING;
+	mCamId = index;
 	bool cam_status = false;
 	if (apiPreference == -1)
 		cam_status = cv::VideoCapture::open(index);
@@ -43,9 +52,8 @@ bool VideoCaptureType::open(int index, int apiPreference) {
 		cam_status = cv::VideoCapture::open(index, apiPreference);
 
 	if (cam_status == true && cv::VideoCapture::grab() == true) {
-		mCamId = index;
 		mStatus = CAM_STATUS_OPENED;
-		//set(mResolution, mFps);
+		gCvCamOpen.notify_one();
 	}
 	else {
 		release();
@@ -71,8 +79,8 @@ CamStatus VideoCaptureType::status() const {
 
 
 void VideoCaptureType::release() {
+	//mCamId = -1;
 	mStatus = CAM_STATUS_CLOSED;
-	mCamId = -1;
 
 	cv::VideoCapture::release();
 }
@@ -80,43 +88,58 @@ void VideoCaptureType::release() {
 
 bool VideoCaptureType::retrieve(FrameType& frame, int flag) {
 	bool status = cv::VideoCapture::retrieve(frame.mat(), flag);
-	frame.setTimestamp(std::chrono::system_clock::now());
 
 	return status;
 }
 
 
-bool VideoCaptureType::read(FrameType& image) {
-	if (cv::VideoCapture::grab()) {
-		this->retrieve(image);
+bool VideoCaptureType::read(FrameType& frame) {
+	if (cv::VideoCapture::grab() && mStatus == CAM_STATUS_OPENED) {
+		frame.setTimestamp(std::chrono::system_clock::now());
+		this->retrieve(frame);
 	}
 	else {
-		release();
-		image.release();
+		//release();
+		mStatus = CAM_STATUS_CLOSED;
+		//frame.release();
+		frame.mat() = cv::Mat::zeros(mResolution, CV_8UC3);
+
+		return false;
 	}
 
-	return !image.empty();
+	//return !frame.empty();
+	return true;
 }
 
 
-VideoCaptureType& VideoCaptureType::operator >> (FrameType& image) {
-	read(image);
+VideoCaptureType& VideoCaptureType::operator >> (FrameType& frame) {
+	read(frame);
 
 	return *this;
 }
 
 
 bool VideoCaptureType::set(cv::Size resolution, float fps) {
-	mResolution = resolution;
-	mFps = fps;
-
 	// get old settings
 	cv::Size oldSize((int)cv::VideoCapture::get(cv::CAP_PROP_FRAME_WIDTH), (int)cv::VideoCapture::get(cv::CAP_PROP_FRAME_HEIGHT));
 	double oldFps = cv::VideoCapture::get(cv::CAP_PROP_FPS);
 	double oldAutofocus = cv::VideoCapture::get(cv::CAP_PROP_AUTOFOCUS);
 
+	if (resolution == oldSize && fps == oldFps)
+		return true;
+
+	std::unique_lock<std::mutex> lk(gMtxStatus);
+	gCvCamOpen.wait(lk, [&] { return this->status() == CAM_STATUS_OPENED; });
+	
+	mStatus = CAM_STATUS_SETTING;
+
+	if (resolution == cv::Size(-1, -1))	resolution = mResolution;
+	else	mResolution = resolution;
+	if (mFps == -1.f)	fps = mFps;
+	else	mFps = fps;
+
 	// disable autofocus
-	if (cv::VideoCapture::get(cv::CAP_PROP_AUTOFOCUS) != 0) {
+	if (oldAutofocus != 0) {
 		cv::VideoCapture::set(cv::CAP_PROP_AUTOFOCUS, 0);
 	}
 
@@ -132,6 +155,8 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 	}
 
 	if (statusSize && statusFps) {
+		mStatus = CAM_STATUS_OPENED;
+		lk.unlock();
 		return true;
 	}
 	else {
@@ -142,6 +167,8 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 		// rollback fps
 		cv::VideoCapture::set(cv::CAP_PROP_FPS, oldFps);
 
+		mStatus = CAM_STATUS_OPENED;
+		lk.unlock();
 		return false;
 	}
 }

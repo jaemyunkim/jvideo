@@ -40,14 +40,14 @@ public:
 	virtual bool isAnyOpened() const;
 	virtual bool isAllOpened() const;
 
-	virtual bool read(std::vector<FrameType>& images);
-	virtual MultiVideoCapture& operator >> (std::vector<FrameType>& images);
+	virtual bool read(std::vector<FrameType>& frames);
+	virtual MultiVideoCapture& operator >> (std::vector<FrameType>& frames);
 
 	virtual bool set(cv::Size resolution, float fps);
-	virtual bool set(int cameraId, cv::Size resolution, float fps);
 
 protected:
 	virtual void resize(size_t size);
+	virtual bool set(int cameraId, cv::Size resolution, float fps);
 
 protected:
 	std::vector<int> mCameraIds;

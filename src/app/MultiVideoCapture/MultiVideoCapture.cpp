@@ -1,20 +1,18 @@
 #include "MultiVideoCapture.hpp"
 #include "VideoCaptureType.hpp"
 
-#include <thread>
 #include <atomic>
-#include <mutex>
-std::mutex gMtxCamRead;
+std::atomic_bool camOpenCondition;
+std::atomic_bool camSetCondition;
 
 #include "ThreadPool.hpp"
 ThreadPool::ThreadPool* pThread_pool = NULL;
-std::atomic_bool camOpenCondition;
 
 
 std::vector<VideoCaptureType> gVidCaps;	// to hide in the MultiVideoCapture class
 
 
-void openCameras(std::atomic_bool& condition, std::vector<VideoCaptureType>& vidCaps, std::vector<int> camIds, int apiPreference) {
+void openCameras(const std::atomic_bool& condition, std::vector<VideoCaptureType>& vidCaps, std::vector<int> camIds, int apiPreference) {
 	const int nbDevs = (int)camIds.size();
 	bool (VideoCaptureType::*openfunc)(int, int) = &VideoCaptureType::open;
 
@@ -23,15 +21,10 @@ void openCameras(std::atomic_bool& condition, std::vector<VideoCaptureType>& vid
 	while (condition) {
 		std::vector<std::future<bool> > futures;
 		for (int i = 0; i < nbDevs; i++) {
-			if (vidCaps[i].status() != CAM_STATUS_OPENED) {
+			if (vidCaps[i].status() == CAM_STATUS_CLOSED) {
 				int id = camIds[i];
 				futures.emplace_back(pThread_pool->EnqueueJob(openfunc, &vidCaps[i], id, apiPreference));
 			}
-		}
-
-		// wait until the previous jobs are done.
-		for (int i = 0; i < futures.size(); i++) {
-			futures[i].wait();
 		}
 
 		// keep trying to open each camera in every [waitFor] sec.
@@ -40,33 +33,31 @@ void openCameras(std::atomic_bool& condition, std::vector<VideoCaptureType>& vid
 }
 
 
-bool setCamera(VideoCaptureType& vidCaps, cv::Size resolution, float fps) {
+void setCamera(const std::atomic_bool& openCondition, std::atomic_bool& setCondition, VideoCaptureType& vidCap, cv::Size resolution, float fps) {
+	bool (VideoCaptureType::*setfunc)(cv::Size, float) = &VideoCaptureType::set;
+
 	int waitFor = 100;
-	// wait if the status of camera is CAM_STATUS_OPENING
-	while (vidCaps.status() == CAM_STATUS_OPENING) {
+	bool goSetting = true;
+	setCondition.store(true);
+	while (openCondition && setCondition) {
+		if (vidCap.status() == CAM_STATUS_OPENED && goSetting == true) {
+			pThread_pool->EnqueueJob(setfunc, &vidCap, resolution, fps);
+			goSetting = false;
+		}
+
+		if (vidCap.status() == CAM_STATUS_CLOSED)
+			goSetting = true;
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(waitFor));
 	}
-
-	bool status = false;
-	if (vidCaps.status() == CAM_STATUS_OPENED) {
-		status = vidCaps.set(resolution, fps);
-	}
-	else if (vidCaps.status() == CAM_STATUS_CLOSED) {
-		// noting to do
-	}
-
-	return status;
 }
 
 
 MultiVideoCapture::MultiVideoCapture() {
-	camOpenCondition.store(true);
 	mCameraIds.clear();
 	mApiPreference = -1;
 	mResolutions.clear();
 	mFpses.clear();
-	//mResolution = { 640, 480 };
-	//mFps = 30.f;
 }
 
 
@@ -84,18 +75,18 @@ void MultiVideoCapture::open(std::vector<int> cameraIds, int apiPreference) {
 	this->resize(cameraIds.size());
 	mCameraIds = cameraIds;
 
-	pThread_pool = new ThreadPool::ThreadPool(gVidCaps.size() * 2 + 2);
+	pThread_pool = new ThreadPool::ThreadPool(gVidCaps.size() * 2 + 4);
 
 	mApiPreference = apiPreference;
 	camOpenCondition.store(true);
 
-	pThread_pool->EnqueueJob(openCameras, std::ref(camOpenCondition), std::ref(gVidCaps), cameraIds, mApiPreference);
+	pThread_pool->EnqueueJob(openCameras, std::cref(camOpenCondition), std::ref(gVidCaps), cameraIds, mApiPreference);
 
 	while (!isAnyOpened()) {
 		std::cout << ".";
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
-	std::cout << "any cam is opened!" << std::endl;
+	std::cout << "one of the cameras is open!" << std::endl;
 }
 
 
@@ -114,13 +105,12 @@ void MultiVideoCapture::release() {
 		}
 	}
 
-	// wait until the previous jobs are done.
-	for (int i = 0; i < futures.size(); i++)
+	// wait until all jobs are done.
+	for (int i = 0; i < futures.size(); i++) {
 		futures[i].wait();
+	}
 
 	if (pThread_pool) {
-		//pThread_pool->~ThreadPool();
-		//pThread_pool->destroy();
 		delete[] pThread_pool;
 		pThread_pool = NULL;
 	}
@@ -128,7 +118,7 @@ void MultiVideoCapture::release() {
 
 
 bool MultiVideoCapture::isOpened(int cameraNum) const {
-	if (gVidCaps[cameraNum].isOpened() == CAM_STATUS_OPENED)
+	if (gVidCaps[cameraNum].isOpened() == true)
 		return true;
 	else
 		return false;
@@ -137,7 +127,7 @@ bool MultiVideoCapture::isOpened(int cameraNum) const {
 
 bool MultiVideoCapture::isAnyOpened() const {
 	for (int i = 0; i < (int)gVidCaps.size(); i++) {
-		if (gVidCaps[i].status() == CAM_STATUS_OPENED) {
+		if (gVidCaps[i].isOpened() == true) {
 			return true;
 		}
 	}
@@ -148,7 +138,7 @@ bool MultiVideoCapture::isAnyOpened() const {
 
 bool MultiVideoCapture::isAllOpened() const {
 	for (int i = 0; i < (int)gVidCaps.size(); i++) {
-		if (gVidCaps[i].status() != CAM_STATUS_OPENED) {
+		if (gVidCaps[i].status() == false) {
 			return false;
 		}
 	}
@@ -157,38 +147,35 @@ bool MultiVideoCapture::isAllOpened() const {
 }
 
 
-bool MultiVideoCapture::read(std::vector<FrameType>& images) {
-	std::lock_guard<std::mutex> lock(gMtxCamRead);
-
+bool MultiVideoCapture::read(std::vector<FrameType>& frames) {
 	const int nbDevs = (int)gVidCaps.size();
-	if (nbDevs != images.size())
-		images.resize(nbDevs);
+	if (nbDevs != frames.size())
+		frames.resize(nbDevs);
 
 	std::vector<std::future<bool> > futures;
 	bool (VideoCaptureType::*readfunc)(FrameType&) = &VideoCaptureType::read;
 
 	for (int i = 0; i < nbDevs; i++) {
 		if (gVidCaps[i].status() == CAM_STATUS_OPENED) {
-			futures.emplace_back(pThread_pool->EnqueueJob(readfunc, &gVidCaps[i], std::ref(images[i])));
+			futures.emplace_back(pThread_pool->EnqueueJob(readfunc, &gVidCaps[i], std::ref(frames[i])));
 		}
+		else
+			frames[i].mat() = cv::Mat::zeros(mResolutions[i], CV_8UC3);
 	}
 
+	// wait until all jobs are done.
 	bool status = false;
-	for (int i = 0; i < nbDevs; i++) {
-		if (!images[i].empty()) {
-			status = true;
-		}
-		else {
-			images[i].mat() = cv::Mat::zeros(mResolutions[i], CV_8UC3);
-		}
+	for (int i = 0; i < futures.size(); i++) {
+		futures[i].wait();
+		status = status || futures[i].get();
 	}
 
 	return status;
 }
 
 
-MultiVideoCapture& MultiVideoCapture::operator >> (std::vector<FrameType>& images) {
-	read(images);
+MultiVideoCapture& MultiVideoCapture::operator >> (std::vector<FrameType>& frames) {
+	read(frames);
 
 	return *this;
 }
@@ -196,52 +183,33 @@ MultiVideoCapture& MultiVideoCapture::operator >> (std::vector<FrameType>& image
 
 bool MultiVideoCapture::set(cv::Size resolution, float fps) {
 	const int nbDevs = (int)gVidCaps.size();
-	std::vector<std::future<bool> > futures;
-	for (int i = 0; i < nbDevs; i++) {
-		futures.emplace_back(pThread_pool->EnqueueJob(setCamera, std::ref(gVidCaps[i]), resolution, fps));
-	}
-
-	for (int i = 0; i < futures.size(); i++) {
-		futures[i].wait();
-	}
-
 	bool status = true;
-	for (int i = 0; i < futures.size(); i++) {
-		if (futures[i].get() == true) {
-			mResolutions[i] = resolution;
-			mFpses[i] = fps;
-		}
-		else
-			status = false;
+	for (int i = 0; i < nbDevs; i++) {
+		bool status_set = this->set(mCameraIds[i], resolution, fps);
+		status = status && status_set;
 	}
-
-	//const int nbDevs = (int)gVidCaps.size();
-	//std::vector<bool> status(nbDevs);
-
-	//for (int i = 0; i < nbDevs; i++) {
-	//	status[i] = gVidCaps[i].set(resolution, fps);
-	//}
 
 	return status;
 }
+
 
 
 bool MultiVideoCapture::set(int cameraId, cv::Size resolution, float fps) {
 	int id = std::find(mCameraIds.begin(), mCameraIds.end(), cameraId) - mCameraIds.begin();
 	if (id >= mCameraIds.size())
 		return false;
+	
+	if (mResolutions[id] == resolution && mFpses[id] == fps)
+		return true;
+	else
+		camSetCondition.store(false);	// for terminating the thread that manages the previous setting.
 
-	std::future<bool> future;
-	future = pThread_pool->EnqueueJob(setCamera, std::ref(gVidCaps[id]), resolution, fps);
-	future.wait();
+	mResolutions[id] = resolution;
+	mFpses[id] = fps;
 
-	bool status = future.get();
-	if (status == true) {
-		mResolutions[id] = resolution;
-		mFpses[id] = fps;
-	}
-
-	return status;
+	pThread_pool->EnqueueJob(setCamera, std::cref(camOpenCondition), std::ref(camSetCondition), std::ref(gVidCaps[id]), mResolutions[id], mFpses[id]);
+	
+	return true;
 }
 
 

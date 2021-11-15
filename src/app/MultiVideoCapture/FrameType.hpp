@@ -43,14 +43,14 @@ public:
 	virtual ~FrameType();
 
 	virtual FrameType clone() const;
-	virtual cv::Mat& mat();
 	virtual void copyTo(FrameType& obj);
 	virtual bool empty() const;
 
 	virtual bool setFrame(const cv::Mat& frame);
 	virtual bool setFrame(const cv::Mat& frame, std::chrono::system_clock::time_point timestamp);
 	virtual void setTimestamp(std::chrono::system_clock::time_point timestamp);
-	virtual cv::Mat getFrame() const;
+	virtual cv::Mat frame() const;
+	virtual cv::Mat& mat();
 	virtual std::chrono::system_clock::time_point timestamp() const;
 
 	virtual void release();
