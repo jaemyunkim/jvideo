@@ -92,16 +92,19 @@ endif(WIN32)
 # set default install prefix
 set(CMAKE_INSTALL_PREFIX "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/install" CACHE PATH "Installation Directory" FORCE)
 
+# copy binariw
 install(TARGETS     ${PROJ_NAME} ${PROJ_NAME}_test
         DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}/
 )
 
-if(WIN32)
-    if(MSVC)
-        # copy dlls
-        install(FILES       $<$<CONFIG:Debug>:${__opencv_dll_dbg}>  # opencv dlls
-                            $<$<NOT:$<CONFIG:Debug>>:${__opencv_dll_release}>   # opencv dlls
-                DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}/
-        )
-    endif(MSVC)
-endif(WIN32)
+# copy headers for dll exports
+install(FILES       FrameType.hpp
+                    MultiVideoCapture.hpp
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}/include/
+)
+
+# copy dlls
+install(FILES       $<$<CONFIG:Debug>:${__opencv_dll_dbg}>  # opencv dlls
+                    $<$<NOT:$<CONFIG:Debug>>:${__opencv_dll_release}>   # opencv dlls
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}/
+)

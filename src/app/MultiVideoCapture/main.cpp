@@ -7,11 +7,12 @@
 
 
 int main() {
-	std::vector<int> camIds = { 1, 0 };
+	std::vector<int> camIds = { 0, 1 };
 	std::vector<FrameType> images(camIds.size());
-	//cv::Size resolution = { 1280, 720 };
+	cv::Size resolution = { 1280, 720 };
+	//cv::Size resolution = { 800, 600 };
 	//cv::Size resolution = { 640, 480 };
-	cv::Size resolution = { 800, 600 };
+	//cv::Size resolution = { 640, 360 };
 	float fps = 30.f;
 
 	MultiVideoCapture mvc;
@@ -33,7 +34,10 @@ int main() {
 		for (int i = 0; i < camIds.size(); i++) {
 			int id = camIds[i];
 			cam_times[i] = images[i].timestamp();
-			cv::imshow("cam " + std::to_string(id), images[i].mat());
+			if (!images[i].empty())
+				cv::imshow("cam " + std::to_string(id), images[i].mat());
+			else
+				cv::imshow("cam " + std::to_string(id), cv::Mat::zeros(resolution, CV_8UC3));
 		}
 
 		std::chrono::duration<double> capture_sec = capture_times[1] - capture_times[0];

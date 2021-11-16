@@ -159,8 +159,6 @@ bool MultiVideoCapture::read(std::vector<FrameType>& frames) {
 		if (gVidCaps[i].status() == CAM_STATUS_OPENED) {
 			futures.emplace_back(pThread_pool->EnqueueJob(readfunc, &gVidCaps[i], std::ref(frames[i])));
 		}
-		else
-			frames[i].mat() = cv::Mat::zeros(mResolutions[i], CV_8UC3);
 	}
 
 	// wait until all jobs are done.
@@ -198,7 +196,7 @@ bool MultiVideoCapture::set(int cameraId, cv::Size resolution, float fps) {
 	int id = std::find(mCameraIds.begin(), mCameraIds.end(), cameraId) - mCameraIds.begin();
 	if (id >= mCameraIds.size())
 		return false;
-	
+
 	if (mResolutions[id] == resolution && mFpses[id] == fps)
 		return true;
 	else
@@ -208,7 +206,7 @@ bool MultiVideoCapture::set(int cameraId, cv::Size resolution, float fps) {
 	mFpses[id] = fps;
 
 	pThread_pool->EnqueueJob(setCamera, std::cref(camOpenCondition), std::ref(camSetCondition), std::ref(gVidCaps[id]), mResolutions[id], mFpses[id]);
-	
+
 	return true;
 }
 

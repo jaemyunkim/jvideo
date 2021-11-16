@@ -101,14 +101,10 @@ bool VideoCaptureType::read(FrameType& frame) {
 	else {
 		//release();
 		mStatus = CAM_STATUS_CLOSED;
-		//frame.release();
-		frame.mat() = cv::Mat::zeros(mResolution, CV_8UC3);
-
-		return false;
+		frame.release();
 	}
 
-	//return !frame.empty();
-	return true;
+	return !frame.empty();
 }
 
 
@@ -130,7 +126,7 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 
 	std::unique_lock<std::mutex> lk(gMtxStatus);
 	gCvCamOpen.wait(lk, [&] { return this->status() == CAM_STATUS_OPENED; });
-	
+
 	mStatus = CAM_STATUS_SETTING;
 
 	if (resolution == cv::Size(-1, -1))	resolution = mResolution;
@@ -146,7 +142,7 @@ bool VideoCaptureType::set(cv::Size resolution, float fps) {
 	// set resolution and fps
 	bool statusSize = true, statusFps = true;
 	if (resolution != oldSize) {
-		statusSize = 
+		statusSize =
 			cv::VideoCapture::set(cv::CAP_PROP_FRAME_WIDTH, resolution.width) &&
 			cv::VideoCapture::set(cv::CAP_PROP_FRAME_HEIGHT, resolution.height);
 	}
