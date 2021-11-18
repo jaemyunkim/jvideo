@@ -15,9 +15,13 @@
 #      define FRAMETYPE_TEMPLATE
 #    endif
 #  else
+#    if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
 #    define MULTIVIDEOCAPTURE_EXPORTS __declspec(dllimport)
+#    elif defined __GNUC__ && __GNUC__ >= 4 || defined(__APPLE__)
+#      define MULTIVIDEOCAPTURE_EXPORTS
+#    endif
 #  endif	// !DLL_EXPORTS
-#endif	// !MULTIVIDEOCAPTURE_EXPORTS
+#endif	// !FRAMETYPE_EXPORTS
 
 
 #include <iostream>

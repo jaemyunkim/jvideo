@@ -11,13 +11,16 @@
 #  ifdef DLL_EXPORTS
 #    if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
 #      define FRAMETYPE_EXPORTS __declspec(dllexport)
-#      define FRAMETYPE_TEMPLATE
 #    elif defined __GNUC__ && __GNUC__ >= 4 || defined(__APPLE__)
 #      define FRAMETYPE_EXPORTS __attribute__ ((visibility ("default")))
-#      define FRAMETYPE_TEMPLATE
 #    endif
+#    define FRAMETYPE_TEMPLATE
 #  else
-#    define FRAMETYPE_EXPORTS __declspec(dllimport)
+#    if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
+#      define FRAMETYPE_EXPORTS __declspec(dllimport)
+#    elif defined __GNUC__ && __GNUC__ >= 4 || defined(__APPLE__)
+#      define FRAMETYPE_EXPORTS
+#    endif
 #    define FRAMETYPE_TEMPLATE extern
 #  endif	// !DLL_EXPORTS
 #endif	// !FRAMETYPE_EXPORTS
@@ -27,14 +30,8 @@
 #include "opencv2/opencv.hpp"
 
 
-#ifdef DLL_EXPORTS
-#  if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
 FRAMETYPE_TEMPLATE template class FRAMETYPE_EXPORTS std::chrono::duration<std::chrono::system_clock::rep, std::chrono::system_clock::period>;
 FRAMETYPE_TEMPLATE template class FRAMETYPE_EXPORTS std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration>;
-FRAMETYPE_TEMPLATE template class FRAMETYPE_EXPORTS cv::Size_<int>;
-FRAMETYPE_TEMPLATE class FRAMETYPE_EXPORTS cv::Mat;
-#  endif
-#endif	// !DLL_EXPORTS
 
 
 class FRAMETYPE_EXPORTS FrameType {

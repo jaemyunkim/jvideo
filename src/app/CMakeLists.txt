@@ -1,6 +1,6 @@
 
 add_subdirectory(VideoRecord)
-add_subdirectory(MultiVideoCapture)
+add_subdirectory(MultiVideoCapture_test)
 IF(USE_QT)
 	add_subdirectory(VideoRecord_gui)
 ENDIF(USE_QT)
